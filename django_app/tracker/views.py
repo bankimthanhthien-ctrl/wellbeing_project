@@ -4,6 +4,8 @@ from django.contrib import messages
 from .models import DailyLog, AIWeeklyReport
 from .forms import DailyLogForm
 from django.shortcuts import get_object_or_404
+
+
 @login_required(login_url='/admin/login/')
 def edit_log(request, pk):
     log = get_object_or_404(DailyLog, pk=pk, user=request.user)
@@ -17,8 +19,14 @@ def edit_log(request, pk):
         form = DailyLogForm(instance=log)
 
     return render(request, 'tracker/edit_log.html', {'form': form, 'log': log})
+
+
 def dashboard(request):
     if request.method == 'POST':
+        # Kiểm tra nếu chưa đăng nhập mà cố submit form
+        if not request.user.is_authenticated:
+            return redirect('/admin/login/')
+
         form = DailyLogForm(request.POST)
         if form.is_valid():
             log = form.save(commit=False)
@@ -33,9 +41,13 @@ def dashboard(request):
     else:
         form = DailyLogForm()
 
-    # Lấy 7 bản ghi gần nhất và báo cáo AI mới nhất
-    recent_logs = DailyLog.objects.filter(user=request.user).order_by('-date')[:7]
-    latest_report = AIWeeklyReport.objects.filter(user=request.user).order_by('-created_at').first()
+    # Chỉ truy vấn dữ liệu khi người dùng đã đăng nhập để tránh lỗi AnonymousUser
+    if request.user.is_authenticated:
+        recent_logs = DailyLog.objects.filter(user=request.user).order_by('-date')[:7]
+        latest_report = AIWeeklyReport.objects.filter(user=request.user).order_by('-created_at').first()
+    else:
+        recent_logs = []
+        latest_report = None
 
     context = {
         'form': form,
