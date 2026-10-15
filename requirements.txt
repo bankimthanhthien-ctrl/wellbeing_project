@@ -1,0 +1,8 @@
+django
+dj-database-url
+fastapi
+uvicorn
+gunicorn
+whitenoise
+psycopg2-binary
+requests

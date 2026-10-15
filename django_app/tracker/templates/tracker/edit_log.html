@@ -1,0 +1,20 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">Chỉnh sửa Nhật ký ngày {{ log.date|date:"d/m/Y" }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100">Cập nhật</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100 mt-2">Quay lại</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
