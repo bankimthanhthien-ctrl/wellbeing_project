@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 import dj_database_url
 import os
 
-database_url = os.getenv('DATABASE_URL')
+database_url = "postgresql://neondb_owner:npg_0PYGbDqpAsz4@ep-noisy-moon-b5lxzqld-pooler.c-7.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 
 if database_url:
     DATABASES = {

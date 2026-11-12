@@ -55,3 +55,16 @@ def dashboard(request):
         'latest_report': latest_report,
     }
     return render(request, 'tracker/dashboard.html', context)
+
+
+@login_required(login_url='/admin/login/')
+def force_run_ai(request):
+    try:
+        # Import hàm từ file updater.py của anh
+        from .updater import process_weekly_coach
+        process_weekly_coach()
+        messages.success(request, '🚀 Đã yêu cầu AI phân tích dữ liệu tuần thành công!')
+    except Exception as e:
+        messages.error(request, f'Lỗi khi chạy AI: {e}')
+
+    return redirect('dashboard')
