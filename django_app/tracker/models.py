@@ -33,3 +33,4 @@ class AIWeeklyReport(models.Model):
     small_goals = models.JSONField(default=list)
     safe_actions = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)
+    disclaimer = models.TextField(blank=True, null=True)
