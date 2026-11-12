@@ -1,40 +1,57 @@
-<!-- tracker/templates/tracker/dashboard.html -->
 {% extends 'tracker/base.html' %}
 
 {% block content %}
 <div class="row">
-    <!-- Cột bên trái: Form nhập liệu -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm">
+    <!-- Cột bên trái: Check-in Hôm Nay -->
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">Check-in Hôm Nay</h5>
+                <h5 class="mb-0">Check-in Hôm Nay</h5>
             </div>
             <div class="card-body">
                 <form method="POST">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <div class="mb-3">
+                        <label class="form-label">Date:</label>
+                        {{ form.date }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mood:</label>
+                        {{ form.mood }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sleep hours:</label>
+                        {{ form.sleep_hours }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Journal:</label>
+                        {{ form.journal }}
+                    </div>
                     <button type="submit" class="btn btn-success w-100">Lưu Nhật Ký</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Cột bên phải: AI Report & Lịch sử -->
-    <div class="col-md-8">
+    <!-- Cột bên phải: AI Coach Nhận Xét & Lịch sử 7 ngày -->
+    <div class="col-md-7">
+        <!-- Khung AI Coach Nhận Xét -->
         {% if latest_report %}
         <div class="card shadow-sm mb-4 border-success">
             <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">🤖 AI Coach Nhận Xét (Tuần {{ latest_report.week_start_date|date:"d/m/Y" }})</h5>
+                <h5 class="mb-0">🤖 AI Coach Nhận Xét (Tuần {{ latest_report.week_start_date|date:"d/m/Y" }})</h5>
             </div>
             <div class="card-body">
                 <p><strong>Tóm tắt:</strong> {{ latest_report.summary }}</p>
 
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-md-4">
                         <h6 class="text-danger">Pattern Tiêu Cực</h6>
                         <ul>
                             {% for pattern in latest_report.negative_patterns %}
                                 <li>{{ pattern }}</li>
+                            {% empty %}
+                                <li>Không có pattern tiêu cực nào đáng kể.</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -43,6 +60,8 @@
                         <ul>
                             {% for goal in latest_report.small_goals %}
                                 <li>{{ goal }}</li>
+                            {% empty %}
+                                <li>Chưa có mục tiêu đề xuất.</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -51,33 +70,43 @@
                         <ul>
                             {% for action in latest_report.safe_actions %}
                                 <li>{{ action }}</li>
+                            {% empty %}
+                                <li>Duy trì lối sống hiện tại.</li>
                             {% endfor %}
                         </ul>
                     </div>
                 </div>
+
+                <!-- Đặt Disclaimer ở dưới cùng của khung AI nhận xét -->
+                {% if latest_report.disclaimer %}
+                <div class="alert alert-danger mt-3 mb-0" role="alert" style="background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px;">
+                    <strong>⚠️ Cảnh báo y tế quan trọng:</strong> {{ latest_report.disclaimer }}
+                </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
 
+        <!-- Lịch sử 7 ngày qua -->
         <div class="card shadow-sm">
             <div class="card-header bg-secondary text-white">
-                <h5 class="card-title mb-0">Lịch sử 7 ngày qua</h5>
+                <h5 class="mb-0">Lịch sử 7 ngày qua</h5>
             </div>
-            <ul class="list-group list-group-flush">
-                {% for log in recent_logs %}
-                <!-- Đã gộp và sửa lại để mỗi log chỉ hiển thị 1 lần kèm nút Sửa -->
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>{{ log.date|date:"d/m/Y" }}</strong> - Cảm xúc: <em>{{ log.mood }}</em> | Ngủ: <em>{{ log.sleep_hours }}h</em>
-                        <br>
-                        <span class="text-muted">{{ log.journal }}</span>
-                    </div>
-                    <a href="{% url 'edit_log' log.id %}" class="btn btn-sm btn-outline-primary">Sửa</a>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-center">Chưa có dữ liệu nào. Hãy nhập ở form bên trái!</li>
-                {% endfor %}
-            </ul>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for log in recent_logs %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ log.date|date:"d/m/Y" }}</strong> - Cảm xúc: <em>{{ log.mood }}</em> | Ngủ: <em>{{ log.sleep_hours }}h</em>
+                                <br><small class="text-muted">{{ log.journal }}</small>
+                            </div>
+                            <a href="{% url 'edit_log' log.id %}" class="btn btn-sm btn-outline-primary">Sửa</a>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-center text-muted py-3">Chưa có nhật ký nào gần đây.</li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </div>
 </div>
