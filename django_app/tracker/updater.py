@@ -6,7 +6,10 @@ def process_weekly_coach():
     users = DailyLog.objects.values_list('user', flat=True).distinct()
 
     for user_id in users:
-        logs = DailyLog.objects.filter(user_id=user_id).order_by('-date')[:7]
+        # Chuyển QuerySet thành list Python bằng cách dùng list() sau khi slice
+        logs_queryset = DailyLog.objects.filter(user_id=user_id).order_by('-date')[:7]
+        logs = list(logs_queryset)
+
         if not logs:
             continue
 
@@ -24,10 +27,13 @@ def process_weekly_coach():
             # Gọi trực tiếp hàm Python xử lý AI không cần qua FastAPI
             data = analyze_user_logs(payload_logs)
 
+            # Vì logs đã là list Python, logs[-1] chính là phần tử cuối cùng (cũ nhất trong tuần)
+            week_start = logs[-1].date
+
             # Lưu kết quả vào cơ sở dữ liệu (NeonDB)
             AIWeeklyReport.objects.create(
                 user_id=user_id,
-                week_start_date=logs.last().date,
+                week_start_date=week_start,
                 summary=data.get("summary", ""),
                 negative_patterns=data.get("negative_patterns", []),
                 small_goals=data.get("small_goals", []),
